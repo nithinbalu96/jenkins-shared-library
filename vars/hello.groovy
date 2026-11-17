@@ -1,45 +1,64 @@
+
 def call() {
-    echo 'Hello from Jenkins Shared Library!'
-pipeline {
-    agent any
-    environment {
-        // Use PATH+EXTRA to append to PATH properly
-        PATH = "/usr/bin:/bin:/opt/homebrew/bin"
+
+    pipeline {
+        agent any
+
+        parameters {
+            booleanParam(
+                name: 'RUN_TESTS',
+                defaultValue: false,
+                description: 'Run Tests'
+            )
+        }
+
+        stages {
+
+            stage('Clone Project') {
+                steps {
+                    git branch: 'main',
+                        url: 'https://github.com/nithinbalu96/Amazon-Jenkins.git'
+                }
+            }
+
+            stage('Clean') {
+                steps {
+                    sh 'mvn clean'
+                }
+            }
+
+            stage('Compile') {
+                steps {
+                    sh 'mvn compile'
+                }
+            }
+
+            stage('Test') {
+                when {
+                    expression {
+                        return params.RUN_TESTS
+                    }
+                }
+                steps {
+                    sh 'mvn test'
+                }
+            }
+
+            stage('Build and Install') {
+                steps {
+                    sh 'mvn install -DskipTests'
+                }
+            }
+        }
+
+        post {
+            success {
+                echo 'Amazon project build successful!'
+            }
+
+            failure {
+                echo 'Amazon project build failed!'
+            }
+        }
     }
-    stages {
-
-        stage('pull scm git ') {
-            steps {
-                git branch: 'main', url: 'https://github.com/nithinbalu96/Amazon-Jenkins.git'
-            }
-        }
-        stage('compile ') {
-            steps {
-                sh 'mvn compile'
-            }
-        }
-
-        stage('build') {
-            steps {
-                 sh 'mvn clean install'
-            }
-        }
-
-        
-    }
-
-  post{
-
-  success{
-     echo 'Build success 1'
-  }
-    
-  failure{
-       echo 'Failure in the build'
-      // pr new 
-   }
-
-  }
-
-
 }
