@@ -1,4 +1,3 @@
-
 def call() {
 
     pipeline {
@@ -53,11 +52,10 @@ def call() {
 
         post {
             success {
-                echo 'Amazon project build successful!'
+                echo 'Amazon build successful!'
             }
-
             failure {
-                echo 'Amazon project build failed!'
+                echo 'Amazon build failed!'
             }
         }
     }
